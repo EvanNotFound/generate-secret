@@ -3,6 +3,7 @@ const { promisify } = require('util');
 const { randomBytes, randomInt } = require('crypto');
 
 const randomBytesAsync = promisify(randomBytes);
+const randomIntAsync = promisify(randomInt);
 
 const MAX_LENGTH = 1024; // Maximum allowed length
 const DEFAULT_LENGTH = 32; // Default length if not specified
@@ -28,7 +29,7 @@ module.exports = async (req, res) => {
 };
 
 async function generateSecureRandomString(length) {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?';
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
   const randomValues = await randomBytesAsync(length);
 
@@ -36,20 +37,18 @@ async function generateSecureRandomString(length) {
     result += charset[randomValues[i] % charset.length];
   }
 
-  // Ensure at least one lowercase, one uppercase, one digit, and one special character
+  // Ensure at least one lowercase, one uppercase, and one digit
   const categories = [
     { regex: /[a-z]/, chars: 'abcdefghijklmnopqrstuvwxyz' },
     { regex: /[A-Z]/, chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' },
-    { regex: /[0-9]/, chars: '0123456789' },
-    { regex: /[!@#$%^&*()-_=+[\]{}|;:,.<>?]/, chars: '!@#$%^&*()-_=+[]{}|;:,.<>?' }
+    { regex: /[0-9]/, chars: '0123456789' }
   ];
 
   for (const category of categories) {
     if (!category.regex.test(result)) {
-      const pos = await promisify(randomInt)(0, length);
-      result = result.substring(0, pos) +
-          category.chars[await promisify(randomInt)(0, category.chars.length)] +
-          result.substring(pos + 1);
+      const pos = await randomIntAsync(0, length);
+      const randomChar = category.chars[await randomIntAsync(0, category.chars.length)];
+      result = result.substring(0, pos) + randomChar + result.substring(pos + 1);
     }
   }
 
