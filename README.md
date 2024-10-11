@@ -1,6 +1,6 @@
 # generate-secret
 
-A simple web app which will generate secrets.
+A simple web app which will generate **better** secrets. Based on [Sandrino Di Mattia](https://github.com/sandrinodimattia/generate-secret)
 
 ## Usage
 
